@@ -3,6 +3,12 @@ import "./style.css";
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <h1>Chatroom</h1>
 
+<input
+  type="text"
+  id="input-username"
+  placeholder="Tu nombre"
+/>
+
 <div id="messages-container"></div>
 
 <div id="input-container">
@@ -18,49 +24,74 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 </div>
 `;
 
+type Message = {
+  author: string;
+  text: string;
+  createdAt: number;
+};
+
+const inputUsername =
+  document.querySelector<HTMLInputElement>("#input-username");
+
 const inputChat = document.querySelector<HTMLInputElement>("#input-chatroom");
-const button = document.querySelector("#send-button");
 
-const messages = document.querySelector("#messages-container");
+const button = document.querySelector<HTMLButtonElement>("#send-button");
 
-function sendMessage() {
-  if (!inputChat?.value) return;
+const messagesContainer = document.querySelector<HTMLDivElement>(
+  "#messages-container",
+);
 
-  const messageText = inputChat.value;
+function renderMessages(messages: Message[]) {
+  if (!messagesContainer) return;
 
-  const newMessage = document.createElement("p");
-  newMessage.classList.add("message");
-  newMessage.innerHTML = messageText;
+  messagesContainer.innerHTML = "";
 
-  messages?.append(newMessage);
+  messages.forEach((msg) => {
+    const p = document.createElement("p");
 
-  inputChat.value = "";
+    p.classList.add("message");
+    p.textContent = `${msg.author}: ${msg.text}`;
 
-  fetch("http://localhost:3000/message", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message: messageText,
-    }),
+    messagesContainer.appendChild(p);
   });
 }
 
-function loadMessages() {
-  fetch("http://localhost:3000/messages")
-    .then((res) => res.json())
-    .then((data) => {
-      messages!.innerHTML = "";
+async function loadMessages() {
+  try {
+    const response = await fetch("http://localhost:3000/messages");
 
-      data.messages.forEach((msg: string) => {
-        const p = document.createElement("p");
-        p.classList.add("message");
-        p.innerHTML = msg;
+    const data = await response.json();
 
-        messages?.append(p);
-      });
+    renderMessages(data.messages);
+  } catch (error) {
+    console.error("Error cargando mensajes", error);
+  }
+}
+
+async function sendMessage() {
+  const username = inputUsername?.value.trim();
+  const text = inputChat?.value.trim();
+
+  if (!username || !text) return;
+
+  try {
+    await fetch("http://localhost:3000/message", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        author: username,
+        message: text,
+      }),
     });
+
+    inputChat!.value = "";
+
+    await loadMessages();
+  } catch (error) {
+    console.error("Error enviando mensaje", error);
+  }
 }
 
 button?.addEventListener("click", sendMessage);
@@ -72,3 +103,7 @@ inputChat?.addEventListener("keydown", (e) => {
 });
 
 loadMessages();
+
+setInterval(() => {
+  loadMessages();
+}, 1000);
