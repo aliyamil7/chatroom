@@ -4,13 +4,9 @@ import cors from "cors";
 
 const app = express();
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("Hello world");
-});
 
 app.post("/message", async (req, res) => {
   const author = req.body.author;
@@ -46,5 +42,5 @@ app.get("/messages", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
+  console.log(`Servidor corriendo`);
 });
