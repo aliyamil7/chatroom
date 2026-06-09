@@ -44,3 +44,7 @@ app.get("/messages", async (req, res) => {
 app.listen(port, () => {
   console.log(`Servidor corriendo`);
 });
+
+console.log("PROJECT:", process.env.FIREBASE_PROJECT_ID);
+console.log("EMAIL:", process.env.FIREBASE_CLIENT_EMAIL);
+console.log("KEY:", process.env.FIREBASE_PRIVATE_KEY?.slice(0, 20));
