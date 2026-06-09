@@ -45,6 +45,12 @@ app.listen(port, () => {
   console.log(`Servidor corriendo`);
 });
 
-console.log("PROJECT:", process.env.FIREBASE_PROJECT_ID);
-console.log("EMAIL:", process.env.FIREBASE_CLIENT_EMAIL);
-console.log("KEY:", process.env.FIREBASE_PRIVATE_KEY?.slice(0, 20));
+app.get("/", (req, res) => {
+  res.send("Servidor OK");
+});
+
+app.get("/test", (req, res) => {
+  res.json({
+    ok: true,
+  });
+});
